@@ -31,19 +31,21 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   sca-trivy:
-    name: SCA - Trivy (filesystem)
+    name: SCA - Trivy (dependencies)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Run Trivy filesystem scan
+      - name: Run Trivy dependency scan
         uses: aquasecurity/trivy-action@master
         with:
           scan-type: 'fs'
           scan-ref: 'juice-shop-src'
-          format: 'sarif'
-          output: 'trivy-results.sarif'
-      - name: Upload Trivy report
+          scanners: 'vuln'
+          format: 'table'
+          severity: 'CRITICAL,HIGH,MEDIUM'
+          output: 'trivy-vuln-report.txt'
+      - name: Upload Trivy vulnerability report
         uses: actions/upload-artifact@v4
         with:
-          name: trivy-report
-          path: trivy-results.sarif
+          name: trivy-vuln-report
+          path: trivy-vuln-report.txt
