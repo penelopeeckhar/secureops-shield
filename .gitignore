@@ -1,0 +1,4 @@
+juice-shop-src/node_modules/
+juice-shop-src/build/
+juice-shop-src/dist/
+*.log
