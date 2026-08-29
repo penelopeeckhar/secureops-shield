@@ -1,4 +1,22 @@
+# Secrets
+.env
+*.env
+**/config/certs/
+**/config/*.key
+**/config/*.pem
+
+# Dépendances lourdes (projets tiers clonés)
+**/node_modules/
 juice-shop-src/node_modules/
-juice-shop-src/build/
-juice-shop-src/dist/
+
+# Données/volumes Docker
+**/data/
+**/logs/
+**/wazuh-config-mount/
+
+# Fichiers de rapport volumineux générés (gardés localement, pas sur Git)
 *.log
+
+# Dépôts tiers (clonés séparément, voir SETUP.md)
+juice-shop-src/
+wazuh-docker/

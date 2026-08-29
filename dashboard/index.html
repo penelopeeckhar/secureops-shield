@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SecureOps Shield — Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0B0F17; --surface:#131A26; --surface-2:#1B2434; --border:#232D40;
+  --text:#E8ECF1; --text-dim:#8B96A8;
+  --ok:#5EEAD4; --warn:#F5A623; --crit:#EF4444; --accent:#6C8CFF;
+  --radius:14px;
+}
+*{box-sizing:border-box; margin:0; padding:0;}
+body{
+  background:var(--bg); color:var(--text);
+  font-family:'IBM Plex Sans', sans-serif;
+  min-height:100vh;
+  display:flex;
+}
+.mono{font-family:'IBM Plex Mono', monospace; font-variant-numeric: tabular-nums;}
+.display{font-family:'Space Grotesk', sans-serif;}
+
+.rail{
+  width:220px; flex-shrink:0; background:var(--surface);
+  border-right:1px solid var(--border);
+  padding:24px 14px; display:flex; flex-direction:column; gap:2px;
+}
+.rail-brand{
+  display:flex; align-items:center; gap:10px;
+  padding:0 10px 22px 10px; margin-bottom:10px; border-bottom:1px solid var(--border);
+}
+.rail-brand svg{flex-shrink:0;}
+.rail-brand span{font-family:'Space Grotesk'; font-weight:700; font-size:15px; letter-spacing:0.2px;}
+.rail-item{
+  display:flex; align-items:center; gap:11px;
+  padding:9px 10px; border-radius:9px; cursor:default;
+  color:var(--text-dim); font-size:13.5px;
+}
+.rail-item.active{background:var(--surface-2); color:var(--text);}
+.rail-num{
+  width:20px; height:20px; border-radius:5px; background:var(--surface-2);
+  display:flex; align-items:center; justify-content:center;
+  font-family:'IBM Plex Mono'; font-size:10.5px; color:var(--text-dim); flex-shrink:0;
+}
+.rail-item.active .rail-num{background:var(--accent); color:#0B0F17; font-weight:600;}
+.rail-item.done .rail-num{background:var(--ok); color:#0B0F17;}
+
+.main{flex:1; min-width:0; padding:28px 34px 60px 34px;}
+.topbar{display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:26px;}
+.topbar h1{font-family:'Space Grotesk'; font-weight:700; font-size:22px;}
+.topbar p{color:var(--text-dim); font-size:13px; margin-top:4px;}
+.scan-meta{text-align:right; font-size:12px; color:var(--text-dim);}
+.scan-meta .dot{display:inline-block; width:7px; height:7px; border-radius:50%; background:var(--ok); margin-right:6px;}
+
+.hero{
+  position:relative; border-radius:var(--radius); overflow:hidden;
+  border:1px solid var(--border);
+  background:var(--surface);
+  display:flex; align-items:center; gap:40px;
+  padding:30px 40px; margin-bottom:26px;
+  min-height:220px;
+}
+.hero-video{
+  position:absolute; inset:0; width:100%; height:100%;
+  object-fit:cover; opacity:0.55;
+  mask-image:linear-gradient(to right, black 0%, black 35%, transparent 85%);
+  -webkit-mask-image:linear-gradient(to right, black 0%, black 35%, transparent 85%);
+}
+.hero::after{
+  content:""; position:absolute; inset:0;
+  background:linear-gradient(90deg, rgba(11,15,23,0.55) 0%, rgba(11,15,23,0.15) 55%, rgba(11,15,23,0.75) 100%);
+}
+.hero-gauge, .hero-text{position:relative; z-index:1;}
+.hero-text{flex:1;}
+.hero-text .eyebrow{color:var(--accent); font-size:11.5px; letter-spacing:1.5px; text-transform:uppercase; font-weight:600; margin-bottom:10px;}
+.hero-text h2{font-family:'Space Grotesk'; font-weight:700; font-size:26px; line-height:1.25; max-width:420px; margin-bottom:14px;}
+.hero-text p{color:var(--text-dim); font-size:13.5px; max-width:400px; line-height:1.6;}
+.hero-gauge{width:190px; height:190px; flex-shrink:0; text-align:center;}
+.gauge-score{font-family:'IBM Plex Mono'; font-weight:600; font-size:34px;}
+.gauge-label{font-size:10.5px; color:var(--text-dim); letter-spacing:1px; text-transform:uppercase; margin-top:2px;}
+
+.grid{display:grid; grid-template-columns:repeat(4, 1fr); gap:16px; margin-bottom:26px;}
+.card{
+  background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+  padding:18px 18px 16px 18px;
+}
+.card-top{display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:14px;}
+.card-title{font-size:12.5px; color:var(--text-dim); font-weight:500;}
+.badge{font-family:'IBM Plex Mono'; font-size:10px; padding:3px 7px; border-radius:5px; font-weight:600; letter-spacing:0.3px;}
+.badge.ok{background:rgba(94,234,212,0.12); color:var(--ok);}
+.badge.warn{background:rgba(245,166,35,0.12); color:var(--warn);}
+.badge.crit{background:rgba(239,68,68,0.12); color:var(--crit);}
+.card-value{font-family:'IBM Plex Mono'; font-weight:600; font-size:28px; margin-bottom:4px;}
+.card-sub{font-size:11.5px; color:var(--text-dim);}
+.card-tool{font-size:10.5px; color:var(--text-dim); margin-top:12px; padding-top:12px; border-top:1px solid var(--border);}
+.card-tool b{color:var(--text); font-weight:500;}
+
+.section-title{font-family:'Space Grotesk'; font-weight:600; font-size:15px; margin-bottom:14px; display:flex; align-items:center; gap:8px;}
+.timeline{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); overflow-y:auto; max-height:340px;}
+.tl-row{
+  display:grid; grid-template-columns:90px 90px 1fr 140px 90px;
+  align-items:center; gap:14px; padding:13px 20px;
+  border-bottom:1px solid var(--border); font-size:12.5px;
+}
+.tl-row:last-child{border-bottom:none;}
+.tl-time{color:var(--text-dim); font-family:'IBM Plex Mono'; font-size:11px;}
+.tl-source{font-size:11px; color:var(--text-dim);}
+.tl-desc{font-weight:500;}
+.tl-tag{font-family:'IBM Plex Mono'; font-size:10.5px; color:var(--text-dim);}
+.pill{display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:600;}
+.pill .dot{width:6px; height:6px; border-radius:50%;}
+.pill.ok .dot{background:var(--ok);} .pill.ok{color:var(--ok);}
+.pill.warn .dot{background:var(--warn);} .pill.warn{color:var(--warn);}
+.pill.crit .dot{background:var(--crit);} .pill.crit{color:var(--crit);}
+
+@media (max-width:1100px){ .grid{grid-template-columns:repeat(2,1fr);} }
+</style>
+</head>
+<body>
+
+<nav class="rail">
+  <div class="rail-brand">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 2L4 5V11C4 16.5 7.4 21.2 12 22C16.6 21.2 20 16.5 20 11V5L12 2Z" stroke="#6C8CFF" stroke-width="1.6" fill="rgba(108,140,255,0.12)"/></svg>
+    <span>SecureOps Shield</span>
+  </div>
+  <div class="rail-item done"><span class="rail-num">0</span>Environnement</div>
+  <div class="rail-item done"><span class="rail-num">1</span>App cible</div>
+  <div class="rail-item done"><span class="rail-num">2</span>CI/CD · SAST</div>
+  <div class="rail-item done"><span class="rail-num">3</span>Scan image</div>
+  <div class="rail-item done"><span class="rail-num">4</span>DAST</div>
+  <div class="rail-item done"><span class="rail-num">5</span>Kubernetes</div>
+  <div class="rail-item done"><span class="rail-num">6</span>EDR (Wazuh)</div>
+  <div class="rail-item done"><span class="rail-num">7</span>SOAR (TheHive)</div>
+  <div class="rail-item active"><span class="rail-num">8</span>Dashboard</div>
+  <div class="rail-item"><span class="rail-num">9</span>Threat Intel</div>
+</nav>
+
+<main class="main">
+  <div class="topbar">
+    <div>
+      <h1>Tableau de bord de sécurité</h1>
+      <p>Score consolidé — SAST, secrets, SCA, image, DAST, K8s, EDR, SOAR</p>
+    </div>
+    <div style="display:flex; flex-direction:column; align-items:flex-end; gap:8px;">
+      <div class="scan-meta"><span class="dot"></span>Dernier scan complet — il y a 12 min</div>
+      <a id="export-pdf" href="#" style="font-size:11.5px; color:var(--accent); text-decoration:none; border:1px solid var(--border); padding:5px 10px; border-radius:7px; font-family:'IBM Plex Mono';">↓ Export PDF</a>
+    </div>
+  </div>
+
+  <div class="hero">
+    <video class="hero-video" src="hero.mp4" autoplay loop muted playsinline></video>
+    <div class="hero-gauge">
+      <svg width="190" height="190" viewBox="0 0 190 190">
+        <circle cx="95" cy="95" r="86" fill="none" stroke="#1B2434" stroke-width="6"/>
+        <circle id="ring-image" cx="95" cy="95" r="86" fill="none" stroke="#5EEAD4" stroke-width="6" stroke-linecap="round" stroke-dasharray="540" stroke-dashoffset="94" transform="rotate(-90 95 95)"/>
+        <circle cx="95" cy="95" r="72" fill="none" stroke="#1B2434" stroke-width="6"/>
+        <circle id="ring-dast" cx="95" cy="95" r="72" fill="none" stroke="#5EEAD4" stroke-width="6" stroke-linecap="round" stroke-dasharray="452" stroke-dashoffset="68" transform="rotate(-90 95 95)"/>
+        <circle cx="95" cy="95" r="58" fill="none" stroke="#1B2434" stroke-width="6"/>
+        <circle id="ring-k8s" cx="95" cy="95" r="58" fill="none" stroke="#F5A623" stroke-width="6" stroke-linecap="round" stroke-dasharray="364" stroke-dashoffset="160" transform="rotate(-90 95 95)"/>
+        <circle cx="95" cy="95" r="44" fill="none" stroke="#1B2434" stroke-width="6"/>
+        <circle id="ring-global" cx="95" cy="95" r="44" fill="none" stroke="#5EEAD4" stroke-width="6" stroke-linecap="round" stroke-dasharray="276" stroke-dashoffset="33" transform="rotate(-90 95 95)"/>
+        <text id="score-text" x="95" y="90" text-anchor="middle" fill="#E8ECF1" font-family="IBM Plex Mono" font-weight="600" font-size="30">82</text>
+        <text x="95" y="110" text-anchor="middle" fill="#8B96A8" font-family="IBM Plex Sans" font-size="10" letter-spacing="1">SCORE / 100</text>
+      </svg>
+    </div>
+    <div class="hero-text">
+      <div class="eyebrow">Défense en profondeur</div>
+      <h2>7 couches de sécurité actives, une seule vue.</h2>
+      <p>Chaque anneau représente un bloc du pipeline — du code source au runtime Kubernetes jusqu'à la détection comportementale EDR. Le score global pondère la sévérité et la fraîcheur de chaque résultat.</p>
+    </div>
+  </div>
+
+  <div class="section-title">Résultats par catégorie</div>
+  <div class="grid">
+
+    <div class="card">
+      <div class="card-top"><span class="card-title">SAST · Secrets · SCA</span><span class="badge warn">3 HIGH</span></div>
+      <div class="card-value">14</div>
+      <div class="card-sub">vulnérabilités ouvertes</div>
+      <div class="card-tool">Dernier run : <b>Semgrep, Bandit, Gitleaks, Trivy fs</b></div>
+    </div>
+
+    <div class="card">
+      <div class="card-top"><span class="card-title">Scan d'image Docker</span><span class="badge ok">Durci</span></div>
+      <div class="card-value" id="val-image">6</div>
+      <div class="card-sub" id="sub-image">CVE restantes (post-hardening, -71%)</div>
+      <div class="card-tool">Image : <b>juice-shop:hardened</b> · Trivy</div>
+    </div>
+
+    <div class="card">
+      <div class="card-top"><span class="card-title">DAST</span><span class="badge crit">2 CRIT</span></div>
+      <div class="card-value" id="val-dast">9</div>
+      <div class="card-sub" id="sub-dast">failles détectées en exécution</div>
+      <div class="card-tool">OWASP ZAP · baseline scan</div>
+    </div>
+
+    <div class="card">
+      <div class="card-top"><span class="card-title">Kubernetes (k3s)</span><span class="badge warn">Partiel</span></div>
+      <div class="card-value" id="val-k8s">87%</div>
+      <div class="card-sub" id="sub-k8s">conformité CIS Benchmark</div>
+      <div class="card-tool">kube-bench + Trivy k8s</div>
+    </div>
+
+    <div class="card">
+      <div class="card-top"><span class="card-title">EDR — Wazuh</span><span class="badge ok">Actif</span></div>
+      <div class="card-value">3</div>
+      <div class="card-sub">alertes niveau ≥7 (24h)</div>
+      <div class="card-tool">FIM realtime · rootcheck</div>
+    </div>
+
+    <div class="card">
+      <div class="card-top"><span class="card-title">SOAR — TheHive</span><span class="badge ok">Automatisé</span></div>
+      <div class="card-value" id="val-soar">1</div>
+      <div class="card-sub" id="sub-soar">ticket créé automatiquement</div>
+      <div class="card-tool">Wazuh → TheHive → Cortex</div>
+    </div>
+
+    <div class="card">
+      <div class="card-top"><span class="card-title">Enrichissement Cortex</span><span class="badge ok">201 OK</span></div>
+      <div class="card-value">100%</div>
+      <div class="card-sub">jobs d'analyse réussis</div>
+      <div class="card-tool">TorProject_1_0 · IP/hash lookup</div>
+    </div>
+
+    <div class="card">
+      <div class="card-top"><span class="card-title">Threat Intel (opt.)</span><span class="badge">—</span></div>
+      <div class="card-value">0</div>
+      <div class="card-sub">IOC centralisés — bloc 9</div>
+      <div class="card-tool">MISP · Checkov (à venir)</div>
+    </div>
+
+  </div>
+
+  <div class="section-title">Chronologie des incidents</div>
+  <div class="timeline" id="timeline-container">
+    <div class="tl-row">
+      <span class="tl-time">00:21:08</span>
+      <span class="tl-source">wazuh-manager</span>
+      <span class="tl-desc">Integrity checksum changed — /etc/issue</span>
+      <span class="tl-tag">rule:550</span>
+      <span class="pill warn"><span class="dot"></span>level 7</span>
+    </div>
+    <div class="tl-row">
+      <span class="tl-time">00:21:09</span>
+      <span class="tl-source">thehive</span>
+      <span class="tl-desc">Alerte créée automatiquement via webhook</span>
+      <span class="tl-tag">auto-create</span>
+      <span class="pill ok"><span class="dot"></span>new</span>
+    </div>
+    <div class="tl-row">
+      <span class="tl-time">23:59:00</span>
+      <span class="tl-source">cortex</span>
+      <span class="tl-desc">Job TorProject_1_0 sur observable IP</span>
+      <span class="tl-tag">status 201</span>
+      <span class="pill ok"><span class="dot"></span>success</span>
+    </div>
+    <div class="tl-row">
+      <span class="tl-time">21:57:28</span>
+      <span class="tl-source">wazuh-manager</span>
+      <span class="tl-desc">Host-based anomaly detection (rootcheck)</span>
+      <span class="tl-tag">rule:510</span>
+      <span class="pill warn"><span class="dot"></span>level 7</span>
+    </div>
+    <div class="tl-row">
+      <span class="tl-time">18:04:12</span>
+      <span class="tl-source">zap</span>
+      <span class="tl-desc">Reflected XSS confirmé sur /rest/products/search</span>
+      <span class="tl-tag">DAST</span>
+      <span class="pill crit"><span class="dot"></span>critical</span>
+    </div>
+  </div>
+
+</main>
+
+<script>
+(function() {
+  var apiHost = window.location.hostname;
+  var apiUrl = "http://" + apiHost + ":5000/api/summary";
+
+  var exportLink = document.getElementById("export-pdf");
+  if (exportLink) exportLink.href = "http://" + apiHost + ":5000/api/report";
+
+  fetch(apiUrl, { cache: "no-store" })
+    .then(function(r) { if (!r.ok) throw new Error("API " + r.status); return r.json(); })
+    .then(function(d) {
+      var scoreEl = document.getElementById("score-text");
+      if (scoreEl && typeof d.global_score === "number") scoreEl.textContent = d.global_score;
+
+      var RING_CIRCUMFERENCE = { image: 540, dast: 452, k8s: 364, global: 276 };
+      function ringColor(pct) {
+        if (pct >= 70) return "#5EEAD4";
+        if (pct >= 40) return "#F5A623";
+        return "#EF4444";
+      }
+      if (d.sub_scores) {
+        Object.keys(RING_CIRCUMFERENCE).forEach(function(key) {
+          var pct = d.sub_scores[key];
+          if (typeof pct !== "number") return;
+          var el = document.getElementById("ring-" + key);
+          if (!el) return;
+          var circ = RING_CIRCUMFERENCE[key];
+          el.setAttribute("stroke-dashoffset", Math.round(circ * (1 - pct / 100)));
+          el.setAttribute("stroke", ringColor(pct));
+        });
+      }
+
+      if (d.image_scan && d.image_scan.available) {
+        var s = d.image_scan.severities;
+        document.getElementById("val-image").textContent = d.image_scan.total;
+        document.getElementById("sub-image").textContent =
+          s.CRITICAL + " critique(s), " + s.HIGH + " haute(s) — Trivy";
+      }
+
+      if (d.dast && d.dast.available) {
+        document.getElementById("val-dast").textContent = d.dast.total;
+        document.getElementById("sub-dast").textContent =
+          d.dast.top_finding ? ("Top: " + d.dast.top_finding) : "failles détectées en exécution";
+      }
+
+      if (d.kubernetes && d.kubernetes.cis_benchmark && d.kubernetes.cis_benchmark.available) {
+        var pct = d.kubernetes.cis_benchmark.compliance_pct;
+        if (pct !== null) document.getElementById("val-k8s").textContent = pct + "%";
+      }
+
+      if (d.soar && d.soar.available) {
+        document.getElementById("val-soar").textContent = d.soar.cases_total;
+        document.getElementById("sub-soar").textContent = d.soar.alerts_total + " alertes TheHive au total (live)";
+      }
+
+      if (d.timeline && d.timeline.available && d.timeline.items && d.timeline.items.length) {
+        var container = document.getElementById("timeline-container");
+        if (container) {
+          container.innerHTML = "";
+          d.timeline.items.forEach(function(item) {
+            var row = document.createElement("div");
+            row.className = "tl-row";
+            row.innerHTML =
+              '<span class="tl-time">' + (item.time || "—") + '</span>' +
+              '<span class="tl-source">' + item.source + '</span>' +
+              '<span class="tl-desc">' + item.desc + '</span>' +
+              '<span class="tl-tag">' + item.tag + '</span>' +
+              '<span class="pill ' + item.pill + '"><span class="dot"></span>' + item.severity.toLowerCase() + '</span>';
+            container.appendChild(row);
+          });
+        }
+      }
+    })
+    .catch(function(err) {
+      console.warn("Dashboard API indisponible, valeurs statiques conservées:", err);
+    });
+})();
+</script>
+</body>
+</html>

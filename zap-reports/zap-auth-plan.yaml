@@ -1,0 +1,52 @@
+env:
+  contexts:
+    - name: JuiceShopAuth
+      urls:
+        - http://juiceshop-target:3000
+      authentication:
+        method: "manual"
+      sessionManagement:
+        method: "headers"
+        parameters:
+          Authorization: "Bearer ${ZAP_AUTH_TOKEN}"
+      users:
+        - name: "zaptest"
+          credentials:
+            username: ""
+            password: ""
+  parameters:
+    failOnError: false
+    progressToStdout: true
+jobs:
+  - type: spiderAjax
+    parameters:
+      context: JuiceShopAuth
+      user: "zaptest"
+      url: http://juiceshop-target:3000
+      maxDuration: 5
+  - type: spider
+    parameters:
+      context: JuiceShopAuth
+      user: "zaptest"
+      url: http://juiceshop-target:3000
+      maxDuration: 3
+  - type: activeScan
+    parameters:
+      context: JuiceShopAuth
+      user: "zaptest"
+      maxRuleDurationInMins: 2
+      maxScanDurationInMins: 15
+  - type: report
+    parameters:
+      template: traditional-html
+      reportDir: /zap/wrk
+      reportFile: zap-authenticated-report-v2
+    risks:
+      - low
+      - medium
+      - high
+  - type: report
+    parameters:
+      template: traditional-json
+      reportDir: /zap/wrk
+      reportFile: zap-authenticated-report-v2

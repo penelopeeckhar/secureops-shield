@@ -1,0 +1,28 @@
+services:
+  dashboard:
+    image: nginx:alpine
+    container_name: secureops-dashboard
+    ports:
+      - "8090:80"
+    volumes:
+      - ./index.html:/usr/share/nginx/html/index.html:ro
+      - ./hero.mp4:/usr/share/nginx/html/hero.mp4:ro
+    restart: unless-stopped
+
+  dashboard-api:
+    build: ./api
+    container_name: secureops-dashboard-api
+    ports:
+      - "5000:5000"
+    environment:
+      TRIVY_IMAGE_PATH: /data/trivy-hardened-v3.json
+      TRIVY_K8S_PATH: /data/k8s/trivy-k8s-full.json
+      KUBE_BENCH_PATH: /data/k8s/kube-bench-report.txt
+      ZAP_PATH: /data/zap-reports/zap-fullscan-report.json
+      THEHIVE_URL: http://192.168.111.10:9000
+      THEHIVE_API_KEY: ${THEHIVE_API_KEY}
+    volumes:
+      - /home/abir/secureops-shield/trivy-hardened-v3.json:/data/trivy-hardened-v3.json:ro
+      - /home/abir/secureops-shield/k8s:/data/k8s:ro
+      - /home/abir/secureops-shield/zap-reports:/data/zap-reports:ro
+    restart: unless-stopped

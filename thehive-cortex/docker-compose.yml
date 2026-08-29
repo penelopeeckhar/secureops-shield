@@ -1,0 +1,87 @@
+services:
+  cassandra:
+    image: cassandra:4.1
+    container_name: thehive-cassandra
+    restart: unless-stopped
+    environment:
+      - MAX_HEAP_SIZE=512M
+      - HEAP_NEWSIZE=100M
+      - CASSANDRA_CLUSTER_NAME=thp
+    volumes:
+      - cassandra_data:/var/lib/cassandra
+    networks:
+      - soc-net
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.13
+    container_name: thehive-elasticsearch
+    restart: unless-stopped
+    environment:
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - xpack.security.enabled=false
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+    networks:
+      - soc-net
+
+  cortex:
+    image: thehiveproject/cortex:3.1.7
+    container_name: cortex
+    restart: unless-stopped
+    depends_on:
+      - elasticsearch
+    command:
+      - --job-directory
+      - /tmp/cortex-jobs
+      - --docker-job-directory
+      - /home/abir/secureops-shield/thehive-cortex/cortex-jobs
+    volumes:
+      - cortex_data:/data
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /home/abir/secureops-shield/thehive-cortex/cortex-jobs:/tmp/cortex-jobs
+    ports:
+      - "9001:9001"
+    networks:
+      - soc-net
+
+  thehive:
+    image: strangebee/thehive:5.2
+    container_name: thehive
+    restart: unless-stopped
+    depends_on:
+      - cassandra
+      - elasticsearch
+    environment:
+      - JVM_OPTS=-Xms512M -Xmx512M
+    command:
+      - --secret
+      - "changeThisSecretKey"
+      - --cql-hostnames
+      - "cassandra"
+      - --index-backend
+      - elasticsearch
+      - --es-hostnames
+      - "elasticsearch"
+      - --cortex-hostnames
+      - "cortex"
+      - --cortex-port
+      - "9001"
+      - --cortex-keys
+      - "${CORTEX_API_KEY}"
+    volumes:
+      - thehive_data:/opt/thp/thehive/files
+    ports:
+      - "9000:9000"
+    networks:
+      - soc-net
+
+networks:
+  soc-net:
+    driver: bridge
+
+volumes:
+  cassandra_data:
+  es_data:
+  cortex_data:
+  thehive_data:
