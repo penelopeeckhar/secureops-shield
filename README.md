@@ -15,14 +15,8 @@ Une application volontairement vulnérable (OWASP Juice Shop) sert de cible
 d'image durcie, tests dynamiques, audit Kubernetes, détection
 comportementale (EDR), réponse à incident automatisée (SOAR), le tout
 consolidé dans un dashboard de scoring centralisé.
-Code source ──▶ CI/CD (SAST/Secrets/SCA) ──▶ Image Docker durcie
-│
-▼
-Kubernetes (CIS) ◀── DAST (ZAP) ◀── Application déployée
-│
-▼
-EDR (Wazuh) ──▶ SOAR (TheHive + Cortex) ──▶ Dashboard consolidé
 
+![Architecture du pipeline](docs/architecture.svg)
 
 ## Correspondance blocs du projet ↔ contenu du dépôt
 
@@ -37,7 +31,6 @@ EDR (Wazuh) ──▶ SOAR (TheHive + Cortex) ──▶ Dashboard consolidé
 | 6 | Détection comportementale (EDR) | `wazuh-config/` | ✅ |
 | 7 | Réponse à incident (SOAR) | `thehive-cortex/`, `wazuh-thehive-integration/` | ✅ |
 | 8 | Dashboard centralisé & scoring | `dashboard/` | ✅ |
-| 9 | Threat Intelligence & IaC *(optionnel)* | — | ⏸️ non réalisé (contrainte RAM de la VM) |
 
 ## Stack technique
 
