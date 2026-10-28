@@ -25,6 +25,17 @@ Créer `dashboard/.env` :
 THEHIVE_API_KEY=<clé générée dans TheHive>
 
 
+## 3 bis. Variables d'environnement
+
+- `CORTEX_API_KEY` : à définir dans `thehive-cortex/.env` (lue par `docker compose`).
+  Copier `thehive-cortex/.env.example` en `thehive-cortex/.env` puis renseigner la valeur.
+- `ZAP_AUTH_TOKEN` : jeton JWT Juice Shop utilisé par le plan ZAP authentifié
+  (`zap-reports/zap-auth-plan.yaml`), à générer au moment du scan avec :
+
+      export ZAP_AUTH_TOKEN=$(curl -s -X POST http://localhost:3000/rest/user/login -H 'Content-Type: application/json' -d '{"email":"zaptest@juice-sh.op","password":"<mot_de_passe_du_compte_test>"}' | jq -r .authentication.token)
+
+- `THEHIVE_API_KEY` : dans `dashboard/.env`, voir la section 3 ci-dessus.
+
 ## 4. Lancer les stacks
 
 Voir les `docker-compose.yml` de chaque dossier (`thehive-cortex/`,

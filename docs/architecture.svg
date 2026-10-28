@@ -23,14 +23,14 @@
 <!-- 2. CI/CD -->
 <rect x="190" y="130" width="320" height="60" rx="10" fill="#E6F1FB" stroke="#185FA5" stroke-width="1"/>
 <text x="350" y="155" text-anchor="middle" font-size="15" font-weight="700" fill="#0C447C">CI/CD — SAST · Secrets · SCA</text>
-<text x="350" y="175" text-anchor="middle" font-size="12" fill="#185FA5">Semgrep · Bandit · Gitleaks · Trivy</text>
+<text x="350" y="175" text-anchor="middle" font-size="12" fill="#185FA5">Semgrep · Gitleaks · Trivy</text>
 
 <line x1="350" y1="190" x2="350" y2="228" stroke="#64748B" stroke-width="1.2" marker-end="url(#arrow)"/>
 
 <!-- 3. Hardened image -->
 <rect x="190" y="230" width="320" height="60" rx="10" fill="#EEEDFE" stroke="#534AB7" stroke-width="1"/>
 <text x="350" y="255" text-anchor="middle" font-size="15" font-weight="700" fill="#3C3489">Image Docker durcie</text>
-<text x="350" y="275" text-anchor="middle" font-size="12" fill="#534AB7">Utilisateur non-root, base slim</text>
+<text x="350" y="275" text-anchor="middle" font-size="12" fill="#534AB7">Utilisateur non-root, image distroless</text>
 
 <!-- split arrows -->
 <path d="M350 290 L350 315 L210 315 L210 340" fill="none" stroke="#64748B" stroke-width="1.2" marker-end="url(#arrow)"/>
